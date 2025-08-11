@@ -1,0 +1,70 @@
+2025-08-08 16:17:43 [1m[INFO][0m ####################################################################################################
+2025-08-08 16:17:43 [1m[INFO][0m Run dir: /home/grenade/workspace/code_recon_3d/log/log_recon_250805/00013_train
+2025-08-08 16:17:43 [1m[INFO][0m ####################################################################################################
+2025-08-08 16:17:43 [1m[INFO][0m General Config
+2025-08-08 16:17:43 [1m[INFO][0m train_dataset:['/home/grenade/workspace/code_recon_3d/data/train', '/home/grenade/workspace/code_recon_3d/data/train']
+2025-08-08 16:17:43 [1m[INFO][0m valid_dataset:['/home/grenade/workspace/code_recon_3d/data/valid']
+2025-08-08 16:17:43 [1m[INFO][0m test_dataset:['/home/grenade/workspace/code_recon_3d/data/test']
+2025-08-08 16:17:43 [1m[INFO][0m data_type:*.mat
+2025-08-08 16:17:43 [1m[INFO][0m debugmode:False
+2025-08-08 16:17:43 [1m[INFO][0m prev_checkpoint:
+2025-08-08 16:17:43 [1m[INFO][0m log_lv:INFO
+2025-08-08 16:17:43 [1m[INFO][0m run_dir:/home/grenade/workspace/code_recon_3d/log/log_recon_250805
+2025-08-08 16:17:43 [1m[INFO][0m init_time:1754637463.928262
+2025-08-08 16:17:43 [1m[INFO][0m model_type:longrecon
+2025-08-08 16:17:43 [1m[INFO][0m optimizer:adam
+2025-08-08 16:17:43 [1m[INFO][0m loss_model:l2
+2025-08-08 16:17:43 [1m[INFO][0m lr:0.0001
+2025-08-08 16:17:43 [1m[INFO][0m lr_decay:0.94
+2025-08-08 16:17:43 [1m[INFO][0m lr_tol:2
+2025-08-08 16:17:43 [1m[INFO][0m gpu:cpu
+2025-08-08 16:17:43 [1m[INFO][0m train_batch:12
+2025-08-08 16:17:43 [1m[INFO][0m valid_batch:1
+2025-08-08 16:17:43 [1m[INFO][0m train_epoch:100
+2025-08-08 16:17:43 [1m[INFO][0m logging_density:4
+2025-08-08 16:17:43 [1m[INFO][0m valid_interval:2
+2025-08-08 16:17:43 [1m[INFO][0m valid_tol:2
+2025-08-08 16:17:43 [1m[INFO][0m num_workers:16
+2025-08-08 16:17:43 [1m[INFO][0m save_val:True
+2025-08-08 16:17:43 [1m[INFO][0m parallel:False
+2025-08-08 16:17:43 [1m[INFO][0m device:cpu
+2025-08-08 16:17:43 [1m[INFO][0m save_max_idx:500
+2025-08-08 16:17:43 [1m[INFO][0m use_meta:False
+2025-08-08 16:17:43 [1m[INFO][0m rotation_conf:rand_10
+2025-08-08 16:17:43 [1m[INFO][0m prior_key:img1_reg
+2025-08-08 16:17:43 [1m[INFO][0m target_key:img2
+2025-08-08 16:17:43 [1m[INFO][0m target_mask_key:mask2
+2025-08-08 16:17:43 [1m[INFO][0m tag:
+2025-08-08 16:17:43 [1m[INFO][0m ####################################################################################################
+2025-08-08 16:17:43 [1m[INFO][0m Model Config
+2025-08-08 16:17:43 [1m[INFO][0m recon_net_chan:64
+2025-08-08 16:17:43 [1m[INFO][0m recon_net_pool:5
+2025-08-08 16:17:43 [1m[INFO][0m block_type:block2
+2025-08-08 16:17:43 [1m[INFO][0m input_depth:16
+2025-08-08 16:17:43 [1m[INFO][0m input_num:3
+2025-08-08 16:17:43 [1m[INFO][0m meta_dim:5
+2025-08-08 16:17:43 [1m[INFO][0m acs_num:24
+2025-08-08 16:17:43 [1m[INFO][0m parallel_factor:8
+2025-08-08 16:17:43 [1m[INFO][0m masknet_chan:32
+2025-08-08 16:17:43 [1m[INFO][0m masknet_conv1d_kernel:3
+2025-08-08 16:17:43 [1m[INFO][0m masknet_num_first_layers:16
+2025-08-08 16:17:43 [1m[INFO][0m sudorecon_net_chan:32
+2025-08-08 16:17:43 [1m[INFO][0m sudorecon_net_pool:4
+2025-08-08 16:17:43 [1m[INFO][0m regnet_chan:24
+2025-08-08 16:17:43 [1m[INFO][0m regnet_pool:5
+2025-08-08 16:17:43 [1m[INFO][0m sampling_scheme:fixed
+2025-08-08 16:17:43 [1m[INFO][0m using_prior:True
+2025-08-08 16:17:43 [1m[INFO][0m using_registration:True
+2025-08-08 16:17:43 [1m[INFO][0m using_consistency:True
+2025-08-08 16:17:43 [1m[INFO][0m variational_k:False
+2025-08-08 16:17:43 [1m[INFO][0m ####################################################################################################
+2025-08-08 16:17:43 [1m[INFO][0m PhaseAugment initialized with FIELD_MAX=2.0, NOISE_MAX=0.02
+2025-08-08 16:17:45 [1m[INFO][0m Train dataset length : 2
+2025-08-08 16:17:45 [1m[INFO][0m PhaseAugment initialized with FIELD_MAX=2.0, NOISE_MAX=0.02
+2025-08-08 16:17:46 [1m[INFO][0m Valid dataset length : 1
+2025-08-08 16:17:46 [1m[INFO][0m PhaseAugment initialized with FIELD_MAX=2.0, NOISE_MAX=0.02
+2025-08-08 16:17:47 [1m[INFO][0m Test dataset length : 1
+2025-08-08 16:17:52 [1m[INFO][0m ####################################################################################################
+2025-08-08 16:17:52 [1m[INFO][0m Train start
+2025-08-08 16:17:52 [1m[INFO][0m Epoch: 0
+2025-08-08 16:17:52 [1m[INFO][0m Learning rate: 1.000e-04
