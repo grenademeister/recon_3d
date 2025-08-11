@@ -1,6 +1,6 @@
 __pycache__/
 log/
-
+nohup.out
 
 *.mat
 *.pyc

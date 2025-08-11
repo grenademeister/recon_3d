@@ -7,8 +7,8 @@ if [ -z "$MODE" ]; then
   exit 1
 fi
 
-LOG_DATE="/home/grenade/workspace/code_recon_3d/log/log_recon_250805"
-PYTHON_PATH=~/miniconda3/envs/torchenv/bin/python
+LOG_DATE="/home/intern2/recon_3d/log/log_recon_250811"
+PYTHON_PATH=~/.conda/envs/torchenv/bin/python
 
 # echo "[INFO] Removing previous log directory: $LOG_DATE"
 # rm -rf $LOG_DATE
@@ -16,13 +16,13 @@ PYTHON_PATH=~/miniconda3/envs/torchenv/bin/python
 echo "[INFO] Removing nohup.out"
 rm -rf nohup.out
 
-export DATA_ROOT="/home/grenade/workspace/code_recon_3d/data"
+export DATA_ROOT="/fast_storage/intern2/slabs"
 export RUN_DIR=$LOG_DATE
 
-GPU="cpu"
+GPU="1"
 ACS_NUM=24
-PARALLEL_FACTOR=1
-TRAIN_BATCH=12
+PARALLEL_FACTOR=8
+TRAIN_BATCH=1
 USING_CONSISTENCY=True
 PREV_CHECKPOINT="/home/intern2/code_recon/log_recon_250805/checkpoints/checkpoint_best.ckpt"
 

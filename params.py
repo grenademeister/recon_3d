@@ -128,7 +128,7 @@ class GeneralConfig:
 @dataclass
 class ModelConfig:
     # ReconNet architecture
-    recon_net_chan: int = 64
+    recon_net_chan: int = 48
     recon_net_pool: int = 5
     block_type: Literal["block1", "block2", "block3"] = "block2"
     input_depth: int = 16

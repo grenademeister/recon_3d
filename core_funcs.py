@@ -26,6 +26,42 @@ NETWORK = LongRecon | torch.nn.DataParallel[LongRecon]
 OPTIM = Adam | AdamW
 
 
+# global loss, temporary solution
+GLOBAL_LOSS = {"loss_recon": [], "loss_sudorecon": [], "loss_reg": []}
+
+import matplotlib.pyplot as plt
+
+def _global_loss(
+    global_loss: dict[str, list[float]] | None = None,
+) -> None:
+    """make plot of global loss in log scale"""
+    plt.figure(figsize=(15, 5))
+    plt.subplot(1, 3, 1)
+    plt.plot(global_loss["loss_recon"], label="loss_recon")
+    plt.yscale("log")
+    plt.title("Loss Recon")
+    plt.xlabel("Iteration")
+    plt.ylabel("Loss (log scale)")
+    plt.legend()
+    plt.subplot(1, 3, 2)
+    plt.plot(global_loss["loss_sudorecon"], label="loss_sudorecon")
+    plt.yscale("log")
+    plt.title("Loss Sudo Recon")
+    plt.xlabel("Iteration")
+    plt.ylabel("Loss (log scale)")
+    plt.legend()
+    plt.subplot(1, 3, 3)
+    plt.plot(global_loss["loss_reg"], label="loss_reg")
+    plt.yscale("log")
+    plt.title("Loss Reg")
+    plt.xlabel("Iteration")
+    plt.ylabel("Loss (log scale)")
+    plt.legend()
+    plt.savefig("global_loss.png")
+    plt.close()
+
+
+
 def get_network(
     device: torch.device | None,
     model_type: str,
@@ -176,17 +212,18 @@ def train_epoch_longrecon(
 
     loss_recon = torch.mean(loss_func(pred, label), dim=(1, 2, 3, 4), keepdim=True)
 
-    if (not network.module.mask_fix) and (network.module.sampling_scheme == "adaptive"):
+    if (not network.mask_fix) and (network.sampling_scheme == "adaptive"): # this doesn't work for parallel gpu training
         loss_mask = mask_reg(mask_prob)
         loss_recon += loss_mask
 
     torch.mean(loss_recon).backward()
     train_state.add("loss_recon", loss_recon)
+    GLOBAL_LOSS["loss_recon"].append(torch.mean(loss_recon).cpu().detach().numpy())
 
-    if (network.module.mask_fix) and (sudorecon is not None) and (reg_pred is not None):
-        label_abs = torch.abs(label[:, 0, :, :] + 1j * label[:, 1, :, :]).unsqueeze(
+    if (network.mask_fix) and (sudorecon is not None) and (reg_pred is not None): # this doesn't work for parallel gpu training
+        label_abs = torch.abs(label[:, 0, :, :, :] + 1j * label[:, 1, :, :, :]).unsqueeze(
             1
-        )  # [B, 1, H, W]
+        )  # [B, 1, Z, H, W]
         loss_sudorecon = torch.mean(loss_func(sudorecon, label_abs), dim=(1, 2, 3, 4), keepdim=True)
         loss_reg = (
             torch.mean(loss_func(reg_pred, reg_label), dim=(1), keepdim=True)
@@ -199,6 +236,10 @@ def train_epoch_longrecon(
 
         train_state.add("loss_sudorecon", loss_sudorecon)
         train_state.add("loss_reg", loss_reg)
+        GLOBAL_LOSS["loss_sudorecon"].append(torch.mean(loss_sudorecon).cpu().detach().numpy())
+        GLOBAL_LOSS["loss_reg"].append(torch.mean(loss_reg).cpu().detach().numpy())
+
+        _global_loss(GLOBAL_LOSS)
 
     return img_cnt_minibatch
 
@@ -285,21 +326,21 @@ def test_part_longrecon(
 ) -> int:
     loss_func = get_loss_func(config.loss_model)
 
-    prior_rot: Tensor = _data[DataWrapper.PriorRot].to(config.device)
-    prior: Tensor = _data[DataWrapper.Prior].to(config.device)
-    target: Tensor = _data[DataWrapper.Target].to(config.device)
-    target_mask: Tensor = _data[DataWrapper.Mask].to(config.device)
-    meta: Tensor = _data[DataWrapper.Meta].to(config.device)
+    prior_rot: Tensor = _data[DataWrapper.PriorRot].to(config.device) # shape: [B, Z, H, W]
+    prior: Tensor = _data[DataWrapper.Prior].to(config.device) # shape: [B, Z, H, W]
+    target: Tensor = _data[DataWrapper.Target].to(config.device) # shape: [B, Z, H, W, 2]
+    target_mask: Tensor = _data[DataWrapper.Mask].to(config.device) # shape: [B, Z, H, W, 2]
+    meta: Tensor = _data[DataWrapper.Meta].to(config.device) # shape: [B, N]
 
-    batch_cnt = prior.shape[0]
+    batch_cnt = prior.shape[0] # B
 
     (
-        output,
-        label_undersample,
-        mask,
+        output, # shape: [B, C=2, Z, H, W]
+        label_undersample, # shape: [B, C=2, Z, H, W]
+        mask, # shape: [B, 1, H, W]
         mask_prob,
-        sudorecon,
-        img1reg,
+        sudorecon, # shape: [B, 1, Z, H, W] or None
+        img1reg, # shape: [B, 1, Z, H, W] or None
     ) = model.long_recon(
         prior=prior,
         prior_rot=prior_rot,
@@ -307,33 +348,33 @@ def test_part_longrecon(
         meta=meta,
     )
 
-    validate_tensor_dimensions([output], 4)  # [B, C, H, W]
+    validate_tensor_dimensions([output], 5)  # [B, C=2, Z, H, W]
     validate_tensor_dimensions([target], 5)  # [B, Z, H, W, C]
 
     validate_tensor_channels(prior, model.input_depth)
     c_middle = prior.shape[1] // 2
 
     output_abs = torch.abs(
-        (output[:, 0, :, :] + 1j * output[:, 1, :, :]).unsqueeze(1)
-    )  # [B, 1, H, W]
+        (output[:, 0, :, :, :] + 1j * output[:, 1, :, :, :])
+    ) # [B, Z, H, W]
+    
     target_abs = torch.abs(target[:, :, :, :, 0] + 1j * target[:, :, :, :, 1])  # [B, Z, H, W]
-    target_abs = target_abs[:, c_middle : c_middle + 1, :, :]  # [B, 1, H, W]
 
     loss = loss_func(output_abs, target_abs)
     loss = torch.mean(loss, dim=(1, 2, 3), keepdim=True)
     test_state.add("loss_recon", loss)
 
     update_metrics(
-        test_state=test_state,
-        output_abs=output_abs,
-        target_abs=target_abs,
-        sudorecon=sudorecon,
-        target_mask=target_mask,
+        test_state=test_state, 
+        output_abs=output_abs, # [B, Z, H, W]
+        target_abs=target_abs, # [B, Z, H, W]
+        sudorecon=sudorecon.squeeze(1) if sudorecon is not None else None, # [B, Z, H, W]
+        target_mask=target_mask, # [B, Z, H, W, 2]
     )
 
-    prior_rot = prior_rot[:, c_middle : c_middle + 1, :, :]
-    prior = prior[:, c_middle : c_middle + 1, :, :]
-    target = target[:, c_middle : c_middle + 1, :, :, :]
+    # prior_rot = prior_rot[:, c_middle : c_middle + 1, :, :]
+    # prior = prior[:, c_middle : c_middle + 1, :, :]
+    # target = target[:, c_middle : c_middle + 1, :, :, :]
 
     if save_val:
         save_result_to_mat(
@@ -343,7 +384,7 @@ def test_part_longrecon(
                 "prior": prior,
                 "prior_rot": prior_rot,
                 "out": output,
-                "target": target,
+                "target": target, # shape: [B, Z, H, W, 2]
                 "label_undersample": label_undersample,
                 "mask": mask,
                 "meta": meta,

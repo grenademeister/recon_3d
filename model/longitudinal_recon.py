@@ -273,8 +273,7 @@ class LongRecon(torch.nn.Module):
 
         t = time.squeeze(1).long()
         t_n = t / self.num_timesteps
-
-        x_t = ((1 - t_n).view(B, 1, 1, 1) * label + t_n.view(B, 1, 1, 1) * noise).type(
+        x_t = ((1 - t_n).view(B, 1, 1, 1, 1) * label + t_n.view(B, 1, 1, 1, 1) * noise).type(
             torch.float32
         ) # [B, C=2, Z, H, W]
 
@@ -303,9 +302,6 @@ class LongRecon(torch.nn.Module):
 
         prior_cond = prior.unsqueeze(1) if self.using_prior else torch.zeros_like(prior) # [B, 1, Z, H, W]
         label_cond = label_undersample.permute(0, 4, 1, 2, 3)  # [B, C, Z, H, W]
-        print("x_t shape:", x_t.shape, "should be [B, C=2, Z, H, W]")
-        print("prior_cond shape:", prior_cond.shape, "should be [B, 1, Z, H, W]")
-        print("label_cond shape:", label_cond.shape, "should be [B, C=2, Z, H, W]")
         pred = self._run_recon_net(
             input=[
                 x_t, # noisy label [B, C, H, W] -> [B, 2, Z, H, W]
@@ -318,7 +314,6 @@ class LongRecon(torch.nn.Module):
             mask=mask, # mask [B, C=1, Z, H, W]
             consistency=False,
         )
-        print("forward end")
         return (
             pred, # shape: [B, C=2, Z, H, W]
             label, # shape: [B, C=2, Z, H, W]
@@ -349,18 +344,18 @@ class LongRecon(torch.nn.Module):
         validate_tensor_dimensions([img_undersample], 5)  # [B, Z, H, W, C]
 
         return (
-            img_undersample,
-            mask,
+            img_undersample, # shape: [B, Z, H, W, C=2]
+            mask, # shape: [B, 1, H, W]
             mask_prob,
         )
 
     @torch.inference_mode()
     def sudo_recon_img(
         self,
-        img_undersample: Tensor,
+        img_undersample: Tensor, # shape: [B, 1, Z, H, W]
     ) -> Tensor:
         validate_tensors([img_undersample])
-        validate_tensor_dimensions([img_undersample], 4)
+        validate_tensor_dimensions([img_undersample], 5)
         validate_tensor_channels(img_undersample, 1)
 
         return self.sudorecon_net.forward(x=img_undersample)
@@ -368,12 +363,12 @@ class LongRecon(torch.nn.Module):
     @torch.inference_mode()
     def registration_prior_to_target(
         self,
-        prior: Tensor,
-        target: Tensor,
+        prior: Tensor, # shape: [B, 1, Z, H, W]
+        target: Tensor, # shape: [B, 1, Z, H, W]
     ) -> tuple[Tensor, Tensor]:
         validate_tensors([prior, target])
-        validate_tensor_dimensions([prior, target], 4)
-        validate_tensor_channels(prior, self.input_depth)
+        validate_tensor_dimensions([prior, target], 5)
+        validate_tensor_channels(prior, 1) # changed
         validate_tensor_channels(target, 1)
 
         reg_pred = self.registration_net(x=(prior, target))
@@ -387,7 +382,7 @@ class LongRecon(torch.nn.Module):
         # ).to(prior.device)
 
         prior_reg = rotate_and_translate_3d_with_scipy(
-            img=prior,
+            img=prior.squeeze(1), # [B, Z, H, W] -> [B, H, W]
             angle_x=-reg_pred[0, 0].cpu(),
             angle_y=-reg_pred[0, 1].cpu(),
             angle_z=-reg_pred[0, 2].cpu(),
@@ -396,29 +391,30 @@ class LongRecon(torch.nn.Module):
             tz=-reg_pred[0, 5].cpu(),
         ).to(prior.device)
 
-        return prior_reg, reg_pred
+        return prior_reg.unsqueeze(1), reg_pred
 
     @torch.inference_mode()
     def flow_reverse(
         self,
-        label_cond: Tensor,
-        prior_cond: Tensor,
-        meta: Tensor,
-        mask: Tensor,
+        label_cond: Tensor, # shape: [B, C=2, Z, H, W]
+        prior_cond: Tensor, # shape: [B, 1, Z, H, W]
+        meta: Tensor, # shape: [B, N]
+        mask: Tensor, # shape: [B, 1, H, W]
     ) -> Tensor:
         """
         Args:
-            label_cond (Tensor): Condition tensor of shape [B, C, H, W].
-            prior_cond (Tensor): Prior condition tensor of shape [B, Z, H, W].
+            label_cond (Tensor): Conditioned label tensor of shape [B, C=2, Z, H, W].
+            prior_cond (Tensor): Conditioned prior tensor of shape [B, 1, Z, H, W].
             meta (Tensor): Meta information tensor [B, N].
             mask (Tensor): Mask tensor of shape [B, 1, H, W].
         """
         validate_tensors([label_cond, prior_cond, mask])
-        validate_tensor_dimensions([label_cond, prior_cond, mask], 4)
-        validate_tensor_channels(prior_cond, self.input_depth)
+        validate_tensor_dimensions([label_cond, prior_cond], 5)
+        validate_tensor_dimensions([mask], 4)  # [B, 1, H, W]
+        validate_tensor_channels(prior_cond, 1)
         validate_tensor_channels(label_cond, 2)
 
-        B, _, _, _ = label_cond.shape
+        B, _, _, _, _ = label_cond.shape
 
         times = torch.tensor([1000, 800, 600, 400, 300, 200, 150, 100, 50, 0], dtype=torch.long)
         dts = (times[:-1] - times[1:]) / self.num_timesteps
@@ -428,7 +424,7 @@ class LongRecon(torch.nn.Module):
         noise = torch.randn_like(label_cond).to(self.device)
 
         t_n = t / self.num_timesteps
-        t_n = t_n.repeat(B).view(B, 1, 1, 1)
+        t_n = t_n.repeat(B).view(B, 1, 1, 1, 1)
         x_t = (t_n * noise).type(torch.float32)
 
         for dt, time in zip(dts, times, strict=True):
@@ -445,9 +441,9 @@ class LongRecon(torch.nn.Module):
 
             pred = self._run_recon_net(
                 input=[
-                    x_t,
-                    label_cond,
-                    prior_cond,
+                    x_t, # noisy label [B, C=2, Z, H, W]
+                    label_cond, # conditioned label [B, C=2, Z, H, W]
+                    prior_cond, # conditioned prior [B, 1, Z, H, W]
                 ],
                 t=t_batch,
                 m=meta,
@@ -464,15 +460,15 @@ class LongRecon(torch.nn.Module):
             x_next = x_t - dt * network_output
             x_t = x_next
 
-        return x_t.type(torch.float32)
+        return x_t.type(torch.float32) # [B, C=2, Z, H, W]
 
     @torch.inference_mode()
     def long_recon(
         self,
-        prior: Tensor,
-        prior_rot: Tensor,
-        target: Tensor,
-        meta: Tensor,
+        prior: Tensor, # shape: [B, Z, H, W]
+        prior_rot: Tensor, # shape: [B, Z, H, W]
+        target: Tensor, # shape: [B, Z, H, W, C=2]
+        meta: Tensor, # shape: [B, N]
     ) -> tuple[
         Tensor,
         Tensor,
@@ -494,8 +490,8 @@ class LongRecon(torch.nn.Module):
         validate_tensor_channels(target, self.input_depth)
 
         (
-            target_undersample,
-            mask,
+            target_undersample, # shape: [B, Z, H, W, C=2]
+            mask, # shape: [B, 1, H, W]
             mask_prob,
         ) = self.undersample_img(
             img=target,
@@ -504,36 +500,33 @@ class LongRecon(torch.nn.Module):
         )
 
         prior = prior_rot if self.using_prior else torch.zeros_like(prior_rot)
-        z_middle = target.shape[1] // 2
 
-        label_undersample = target_undersample[
-            :, z_middle : z_middle + 1, :, :, :
-        ]  # [B, 1, H, W, C]
-        label_cond = label_undersample.transpose(1, 4).squeeze(4)  # [B, C, H, W]
+        label_undersample = target_undersample  # [B, Z, H, W, C]
+        label_cond = label_undersample.permute(0, 4, 1, 2, 3)  # [B, C=2, Z, H, W]
 
         if self.using_registration:
             label_undersample_complex = tensor_5d_2_complex(label_undersample).clone().detach()
-            sudo_recon_input = torch.abs(label_undersample_complex)
+            sudo_recon_input = torch.abs(label_undersample_complex).unsqueeze(1)  # [B, Z, H, W] -> [B, C=1, Z, H, W]
             sudo_recon = self.sudo_recon_img(img_undersample=sudo_recon_input)
-            prior_reg, _ = self.registration_prior_to_target(prior=prior_rot, target=sudo_recon)
-            prior_cond = prior_reg
+            prior_reg, _ = self.registration_prior_to_target(prior=prior_rot.unsqueeze(1), target=sudo_recon)
+            prior_cond = prior_reg # [B, 1, Z, H, W]
         else:
             sudo_recon = None
             prior_reg = None
             prior_cond = prior
 
         x_t = self.flow_reverse(
-            label_cond=label_cond,
-            prior_cond=prior_cond,
+            label_cond=label_cond, # shape: [B, C=2, Z, H, W]
+            prior_cond=prior_cond, # shape: [B, 1, Z, H, W]
             meta=meta,
             mask=mask,
-        )
+        ) # shape: [B, C=2, Z, H, W]
 
         return (
-            x_t.type(torch.float32),
-            label_undersample.type(torch.float32),
-            mask,
+            x_t.type(torch.float32), # shape: [B, C=2, Z, H, W]
+            label_undersample.type(torch.float32), # shape: [B, C=2, Z, H, W]
+            mask, # shape: [B, 1, H, W]
             mask_prob,
-            sudo_recon,
-            prior_reg,
+            sudo_recon, # shape: [B, 1, Z, H, W] or None
+            prior_reg, # shape: [B, 1, Z, H, W] or None
         )

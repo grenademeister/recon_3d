@@ -23,7 +23,7 @@ class MetricController:
         if key not in self.state_dict:
             self.state_dict[key] = []
 
-        if value.dim() == 4 and value.shape[1:] == (1, 1, 1):
+        if value.dim() == 4 and value.shape[1:] == (1, 1, 1) or value.dim() == 5 and value.shape[1:] == (1, 1, 1, 1):
             value = value.view(-1)
         elif value.dim() == 1:
             pass

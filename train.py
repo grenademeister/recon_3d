@@ -214,6 +214,8 @@ class Trainer:
             ]
             logger.info(f"Learning rate: {lr_epoch:0.3e}")
 
+            # self._valid(epoch)  # Validate before training, only for testing purposes
+
             train_epoch(
                 train_loader=self.train_loader,
                 train_len=self.train_len,

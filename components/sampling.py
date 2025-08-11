@@ -42,7 +42,7 @@ def apply_fixed_mask(
     output = ifft2c(img_k * mask)
 
     mask = mask.type(torch.float32)
-    # mask is [B, 1, H, W] with complex64 dtype
+    # mask is [B, 1, H, W] with float32 dtype
 
     return (
         output,
