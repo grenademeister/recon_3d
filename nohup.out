@@ -1,70 +1,93 @@
-2025-08-11 04:26:44 [1m[INFO][0m ####################################################################################################
-2025-08-11 04:26:44 [1m[INFO][0m Run dir: /home/intern2/recon_3d/log/log_recon_250811/00017_train
-2025-08-11 04:26:44 [1m[INFO][0m ####################################################################################################
-2025-08-11 04:26:44 [1m[INFO][0m General Config
-2025-08-11 04:26:44 [1m[INFO][0m train_dataset:['/fast_storage/intern2/slabs/train', '/fast_storage/intern2/slabs/train']
-2025-08-11 04:26:44 [1m[INFO][0m valid_dataset:['/fast_storage/intern2/slabs/valid']
-2025-08-11 04:26:44 [1m[INFO][0m test_dataset:['/fast_storage/intern2/slabs/test']
-2025-08-11 04:26:44 [1m[INFO][0m data_type:*.mat
-2025-08-11 04:26:44 [1m[INFO][0m debugmode:False
-2025-08-11 04:26:44 [1m[INFO][0m prev_checkpoint:
-2025-08-11 04:26:44 [1m[INFO][0m log_lv:INFO
-2025-08-11 04:26:44 [1m[INFO][0m run_dir:/home/intern2/recon_3d/log/log_recon_250811
-2025-08-11 04:26:44 [1m[INFO][0m init_time:1754900804.7423615
-2025-08-11 04:26:44 [1m[INFO][0m model_type:longrecon
-2025-08-11 04:26:44 [1m[INFO][0m optimizer:adam
-2025-08-11 04:26:44 [1m[INFO][0m loss_model:l2
-2025-08-11 04:26:44 [1m[INFO][0m lr:0.0001
-2025-08-11 04:26:44 [1m[INFO][0m lr_decay:0.94
-2025-08-11 04:26:44 [1m[INFO][0m lr_tol:2
-2025-08-11 04:26:44 [1m[INFO][0m gpu:1
-2025-08-11 04:26:44 [1m[INFO][0m train_batch:1
-2025-08-11 04:26:44 [1m[INFO][0m valid_batch:1
-2025-08-11 04:26:44 [1m[INFO][0m train_epoch:100
-2025-08-11 04:26:44 [1m[INFO][0m logging_density:4
-2025-08-11 04:26:44 [1m[INFO][0m valid_interval:2
-2025-08-11 04:26:44 [1m[INFO][0m valid_tol:2
-2025-08-11 04:26:44 [1m[INFO][0m num_workers:16
-2025-08-11 04:26:44 [1m[INFO][0m save_val:True
-2025-08-11 04:26:44 [1m[INFO][0m parallel:False
-2025-08-11 04:26:44 [1m[INFO][0m device:cuda
-2025-08-11 04:26:44 [1m[INFO][0m save_max_idx:500
-2025-08-11 04:26:44 [1m[INFO][0m use_meta:False
-2025-08-11 04:26:44 [1m[INFO][0m rotation_conf:rand_10
-2025-08-11 04:26:44 [1m[INFO][0m prior_key:img1_reg
-2025-08-11 04:26:44 [1m[INFO][0m target_key:img2
-2025-08-11 04:26:44 [1m[INFO][0m target_mask_key:mask2
-2025-08-11 04:26:44 [1m[INFO][0m tag:
-2025-08-11 04:26:44 [1m[INFO][0m ####################################################################################################
-2025-08-11 04:26:44 [1m[INFO][0m Model Config
-2025-08-11 04:26:44 [1m[INFO][0m recon_net_chan:48
-2025-08-11 04:26:44 [1m[INFO][0m recon_net_pool:5
-2025-08-11 04:26:44 [1m[INFO][0m block_type:block2
-2025-08-11 04:26:44 [1m[INFO][0m input_depth:16
-2025-08-11 04:26:44 [1m[INFO][0m input_num:3
-2025-08-11 04:26:44 [1m[INFO][0m meta_dim:5
-2025-08-11 04:26:44 [1m[INFO][0m acs_num:24
-2025-08-11 04:26:44 [1m[INFO][0m parallel_factor:8
-2025-08-11 04:26:44 [1m[INFO][0m masknet_chan:32
-2025-08-11 04:26:44 [1m[INFO][0m masknet_conv1d_kernel:3
-2025-08-11 04:26:44 [1m[INFO][0m masknet_num_first_layers:16
-2025-08-11 04:26:44 [1m[INFO][0m sudorecon_net_chan:32
-2025-08-11 04:26:44 [1m[INFO][0m sudorecon_net_pool:4
-2025-08-11 04:26:44 [1m[INFO][0m regnet_chan:24
-2025-08-11 04:26:44 [1m[INFO][0m regnet_pool:5
-2025-08-11 04:26:44 [1m[INFO][0m sampling_scheme:fixed
-2025-08-11 04:26:44 [1m[INFO][0m using_prior:True
-2025-08-11 04:26:44 [1m[INFO][0m using_registration:True
-2025-08-11 04:26:44 [1m[INFO][0m using_consistency:True
-2025-08-11 04:26:44 [1m[INFO][0m variational_k:False
-2025-08-11 04:26:44 [1m[INFO][0m ####################################################################################################
-2025-08-11 04:26:45 [1m[INFO][0m PhaseAugment initialized with FIELD_MAX=2.0, NOISE_MAX=0.02
-2025-08-11 04:26:46 [1m[INFO][0m Train dataset length : 7188
-2025-08-11 04:26:46 [1m[INFO][0m PhaseAugment initialized with FIELD_MAX=2.0, NOISE_MAX=0.02
-2025-08-11 04:26:47 [1m[INFO][0m Valid dataset length : 360
-2025-08-11 04:26:47 [1m[INFO][0m PhaseAugment initialized with FIELD_MAX=2.0, NOISE_MAX=0.02
-2025-08-11 04:26:48 [1m[INFO][0m Test dataset length : 360
-2025-08-11 04:26:52 [1m[INFO][0m ####################################################################################################
-2025-08-11 04:26:52 [1m[INFO][0m Train start
-2025-08-11 04:26:52 [1m[INFO][0m Epoch: 0
-2025-08-11 04:26:52 [1m[INFO][0m Learning rate: 1.000e-04
+2025-08-11 12:41:52 [1m[INFO][0m ####################################################################################################
+2025-08-11 12:41:52 [1m[INFO][0m Run dir: /home/intern2/recon_3d/log/log_recon_250812/00000_train
+2025-08-11 12:41:52 [1m[INFO][0m ####################################################################################################
+2025-08-11 12:41:52 [1m[INFO][0m General Config
+2025-08-11 12:41:52 [1m[INFO][0m train_dataset:['/fast_storage/intern2/slabs/train', '/fast_storage/intern2/slabs/train']
+2025-08-11 12:41:52 [1m[INFO][0m valid_dataset:['/fast_storage/intern2/slabs/valid']
+2025-08-11 12:41:52 [1m[INFO][0m test_dataset:['/fast_storage/intern2/slabs/test']
+2025-08-11 12:41:52 [1m[INFO][0m data_type:*.mat
+2025-08-11 12:41:52 [1m[INFO][0m debugmode:False
+2025-08-11 12:41:52 [1m[INFO][0m prev_checkpoint:
+2025-08-11 12:41:52 [1m[INFO][0m log_lv:INFO
+2025-08-11 12:41:52 [1m[INFO][0m run_dir:/home/intern2/recon_3d/log/log_recon_250812
+2025-08-11 12:41:52 [1m[INFO][0m init_time:1754930512.1249638
+2025-08-11 12:41:52 [1m[INFO][0m model_type:longrecon
+2025-08-11 12:41:52 [1m[INFO][0m optimizer:adam
+2025-08-11 12:41:52 [1m[INFO][0m loss_model:l2
+2025-08-11 12:41:52 [1m[INFO][0m lr:0.0001
+2025-08-11 12:41:52 [1m[INFO][0m lr_decay:0.94
+2025-08-11 12:41:52 [1m[INFO][0m lr_tol:2
+2025-08-11 12:41:52 [1m[INFO][0m gpu:1
+2025-08-11 12:41:52 [1m[INFO][0m train_batch:2
+2025-08-11 12:41:52 [1m[INFO][0m valid_batch:1
+2025-08-11 12:41:52 [1m[INFO][0m train_epoch:100
+2025-08-11 12:41:52 [1m[INFO][0m logging_density:4
+2025-08-11 12:41:52 [1m[INFO][0m valid_interval:2
+2025-08-11 12:41:52 [1m[INFO][0m valid_tol:2
+2025-08-11 12:41:52 [1m[INFO][0m num_workers:16
+2025-08-11 12:41:52 [1m[INFO][0m save_val:True
+2025-08-11 12:41:52 [1m[INFO][0m parallel:False
+2025-08-11 12:41:52 [1m[INFO][0m device:cuda
+2025-08-11 12:41:52 [1m[INFO][0m save_max_idx:500
+2025-08-11 12:41:52 [1m[INFO][0m use_meta:False
+2025-08-11 12:41:52 [1m[INFO][0m rotation_conf:rand_10
+2025-08-11 12:41:52 [1m[INFO][0m prior_key:img1_reg
+2025-08-11 12:41:52 [1m[INFO][0m target_key:img2
+2025-08-11 12:41:52 [1m[INFO][0m target_mask_key:mask2
+2025-08-11 12:41:52 [1m[INFO][0m tag:
+2025-08-11 12:41:52 [1m[INFO][0m ####################################################################################################
+2025-08-11 12:41:52 [1m[INFO][0m Model Config
+2025-08-11 12:41:52 [1m[INFO][0m recon_net_chan:16
+2025-08-11 12:41:52 [1m[INFO][0m recon_net_pool:4
+2025-08-11 12:41:52 [1m[INFO][0m block_type:block2
+2025-08-11 12:41:52 [1m[INFO][0m input_depth:16
+2025-08-11 12:41:52 [1m[INFO][0m input_num:3
+2025-08-11 12:41:52 [1m[INFO][0m meta_dim:5
+2025-08-11 12:41:52 [1m[INFO][0m acs_num:24
+2025-08-11 12:41:52 [1m[INFO][0m parallel_factor:8
+2025-08-11 12:41:52 [1m[INFO][0m masknet_chan:32
+2025-08-11 12:41:52 [1m[INFO][0m masknet_conv1d_kernel:3
+2025-08-11 12:41:52 [1m[INFO][0m masknet_num_first_layers:16
+2025-08-11 12:41:52 [1m[INFO][0m sudorecon_net_chan:32
+2025-08-11 12:41:52 [1m[INFO][0m sudorecon_net_pool:4
+2025-08-11 12:41:52 [1m[INFO][0m regnet_chan:24
+2025-08-11 12:41:52 [1m[INFO][0m regnet_pool:5
+2025-08-11 12:41:52 [1m[INFO][0m sampling_scheme:fixed
+2025-08-11 12:41:52 [1m[INFO][0m using_prior:True
+2025-08-11 12:41:52 [1m[INFO][0m using_registration:True
+2025-08-11 12:41:52 [1m[INFO][0m using_consistency:True
+2025-08-11 12:41:52 [1m[INFO][0m variational_k:False
+2025-08-11 12:41:52 [1m[INFO][0m ####################################################################################################
+2025-08-11 12:41:52 [1m[INFO][0m PhaseAugment initialized with FIELD_MAX=2.0, NOISE_MAX=0.02
+2025-08-11 12:41:53 [1m[INFO][0m Train dataset length : 7188
+2025-08-11 12:41:53 [1m[INFO][0m PhaseAugment initialized with FIELD_MAX=2.0, NOISE_MAX=0.02
+2025-08-11 12:41:54 [1m[INFO][0m Valid dataset length : 60
+2025-08-11 12:41:54 [1m[INFO][0m PhaseAugment initialized with FIELD_MAX=2.0, NOISE_MAX=0.02
+2025-08-11 12:41:55 [1m[INFO][0m Test dataset length : 60
+2025-08-11 12:41:57 [1m[INFO][0m ####################################################################################################
+2025-08-11 12:41:57 [1m[INFO][0m Train start
+2025-08-11 12:41:57 [1m[INFO][0m Epoch: 0
+2025-08-11 12:41:57 [1m[INFO][0m Learning rate: 1.000e-04
+2025-08-11 13:56:11 [1m[INFO][0m 01h 14m 19s | loss_recon: 9.164e-03
+2025-08-11 13:56:11 [1m[INFO][0m 01h 14m 19s | loss_sudorecon: 1.329e-02
+2025-08-11 13:56:11 [1m[INFO][0m 01h 14m 19s | loss_reg: 2.891e-01
+2025-08-11 15:10:49 [1m[INFO][0m 02h 28m 57s | loss_recon: 5.946e-03
+2025-08-11 15:10:49 [1m[INFO][0m 02h 28m 57s | loss_sudorecon: 9.687e-03
+2025-08-11 15:10:49 [1m[INFO][0m 02h 28m 57s | loss_reg: 2.678e-01
+2025-08-11 16:25:29 [1m[INFO][0m 03h 43m 36s | loss_recon: 4.687e-03
+2025-08-11 16:25:29 [1m[INFO][0m 03h 43m 36s | loss_sudorecon: 8.229e-03
+2025-08-11 16:25:29 [1m[INFO][0m 03h 43m 36s | loss_reg: 2.574e-01
+2025-08-11 17:40:34 [1m[INFO][0m 04h 58m 42s | loss_recon: 3.976e-03
+2025-08-11 17:40:34 [1m[INFO][0m 04h 58m 42s | loss_sudorecon: 7.395e-03
+2025-08-11 17:40:34 [1m[INFO][0m 04h 58m 42s | loss_reg: 2.504e-01
+2025-08-11 17:40:35 [1m[INFO][0m Epoch: 1
+2025-08-11 17:40:35 [1m[INFO][0m Learning rate: 1.000e-04
+2025-08-11 18:55:50 [1m[INFO][0m 06h 13m 57s | loss_recon: 1.658e-03
+2025-08-11 18:55:50 [1m[INFO][0m 06h 13m 57s | loss_sudorecon: 4.693e-03
+2025-08-11 18:55:50 [1m[INFO][0m 06h 13m 57s | loss_reg: 2.243e-01
+2025-08-11 20:11:18 [1m[INFO][0m 07h 29m 26s | loss_recon: 1.574e-03
+2025-08-11 20:11:18 [1m[INFO][0m 07h 29m 26s | loss_sudorecon: 4.589e-03
+2025-08-11 20:11:18 [1m[INFO][0m 07h 29m 26s | loss_reg: 2.167e-01
+2025-08-11 21:26:58 [1m[INFO][0m 08h 45m 06s | loss_recon: 1.513e-03
+2025-08-11 21:26:58 [1m[INFO][0m 08h 45m 06s | loss_sudorecon: 4.503e-03
+2025-08-11 21:26:58 [1m[INFO][0m 08h 45m 06s | loss_reg: 2.106e-01

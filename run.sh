@@ -7,7 +7,7 @@ if [ -z "$MODE" ]; then
   exit 1
 fi
 
-LOG_DATE="/home/intern2/recon_3d/log/log_recon_250811"
+LOG_DATE="/home/intern2/recon_3d/log/log_recon_250812"
 PYTHON_PATH=~/.conda/envs/torchenv/bin/python
 
 # echo "[INFO] Removing previous log directory: $LOG_DATE"
@@ -22,7 +22,7 @@ export RUN_DIR=$LOG_DATE
 GPU="1"
 ACS_NUM=24
 PARALLEL_FACTOR=8
-TRAIN_BATCH=1
+TRAIN_BATCH=2
 USING_CONSISTENCY=True
 PREV_CHECKPOINT="/home/intern2/code_recon/log_recon_250805/checkpoints/checkpoint_best.ckpt"
 

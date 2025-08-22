@@ -11,15 +11,15 @@ class SSIMcal(nn.Module):
         self.win_size = win_size
         self.k1, self.k2 = k1, k2
         # single-channel averaging window
-        self.register_buffer("w", torch.ones(1, 1, win_size, win_size) / (win_size ** 2))
-        npix = win_size ** 2
+        self.register_buffer("w", torch.ones(1, 1, win_size, win_size) / (win_size**2))
+        npix = win_size**2
         self.cov_norm = npix / (npix - 1)
 
     def forward(
         self,
-        img: torch.Tensor,        # (B, Z, H, W)
-        ref: torch.Tensor,        # (B, Z, H, W)
-        data_range: torch.Tensor, # (B,) or (B, 1, 1, 1)
+        img: torch.Tensor,  # (B, Z, H, W)
+        ref: torch.Tensor,  # (B, Z, H, W)
+        data_range: torch.Tensor,  # (B,) or (B, 1, 1, 1)
     ) -> torch.Tensor:
         if img.dim() != 4 or ref.dim() != 4:
             raise ValueError("img and ref must be 4D tensors: (B, Z, H, W).")
@@ -45,24 +45,24 @@ class SSIMcal(nn.Module):
         C1 = (self.k1 * dr) ** 2
         C2 = (self.k2 * dr) ** 2
 
-        ux  = F.conv2d(img_f, w)
-        uy  = F.conv2d(ref_f, w)
+        ux = F.conv2d(img_f, w)
+        uy = F.conv2d(ref_f, w)
         uxx = F.conv2d(img_f * img_f, w)
         uyy = F.conv2d(ref_f * ref_f, w)
         uxy = F.conv2d(img_f * ref_f, w)
 
-        vx  = self.cov_norm * (uxx - ux * ux)
-        vy  = self.cov_norm * (uyy - uy * uy)
+        vx = self.cov_norm * (uxx - ux * ux)
+        vy = self.cov_norm * (uyy - uy * uy)
         vxy = self.cov_norm * (uxy - ux * uy)
 
         A1 = 2 * ux * uy + C1
         A2 = 2 * vxy + C2
-        B1 = ux ** 2 + uy ** 2 + C1
+        B1 = ux**2 + uy**2 + C1
         B2 = vx + vy + C2
 
         S = (A1 * A2) / (B1 * B2)  # (B*Z, 1, H', W')
         # mean over spatial, then average across Z to return (B,1,1,1)
-        ssim_spatial = S.mean(dim=(2, 3), keepdim=True)          # (B*Z,1,1,1)
+        ssim_spatial = S.mean(dim=(2, 3), keepdim=True)  # (B*Z,1,1,1)
         ssim_bz = ssim_spatial.view(B, Z, 1, 1, 1).mean(1, keepdim=False)  # (B,1,1,1)
         return ssim_bz
 
@@ -130,8 +130,9 @@ def calculate_psnr(
         mse = torch.mean((img - ref) ** 2, dim=(1, 2, 3), keepdim=True)
 
     img_max = torch.amax(ref, dim=(1, 2, 3), keepdim=True)
-    psnr = 10 * torch.log10((img_max ** 2) / (mse + 1e-12))
+    psnr = 10 * torch.log10((img_max**2) / (mse + 1e-12))
     return psnr
+
 
 if __name__ == "__main__":
     torch.manual_seed(0)

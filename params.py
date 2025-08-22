@@ -128,8 +128,8 @@ class GeneralConfig:
 @dataclass
 class ModelConfig:
     # ReconNet architecture
-    recon_net_chan: int = 48
-    recon_net_pool: int = 5
+    recon_net_chan: int = 16
+    recon_net_pool: int = 4
     block_type: Literal["block1", "block2", "block3"] = "block2"
     input_depth: int = 16
     input_num: int = 3
@@ -163,76 +163,76 @@ class TestConfig:
     # Dataset
     longitudinal_checkpoints: str = ""
 
+if __name__ == "__main__":
+    # Argparser
+    parser = argparse.ArgumentParser(description="Training Configuration")
+    general_config_dict = asdict(GeneralConfig())
+    model_config_dict = asdict(ModelConfig())
+    test_config_dict = asdict(TestConfig())
 
-# Argparser
-parser = argparse.ArgumentParser(description="Training Configuration")
-general_config_dict = asdict(GeneralConfig())
-model_config_dict = asdict(ModelConfig())
-test_config_dict = asdict(TestConfig())
+    for key, default_value in general_config_dict.items():
+        if isinstance(default_value, bool):
+            parser.add_argument(
+                f"--{key}",
+                type=lambda x: x.lower() in ("true", "t", "yes", "y", "1"),
+                default=None,
+                help=f"Set {key} (true/false, default: {default_value})",
+            )
+        else:
+            parser.add_argument(
+                f"--{key}",
+                type=type(default_value),
+                default=None,
+                help=f"Override for {key}",
+            )
 
-for key, default_value in general_config_dict.items():
-    if isinstance(default_value, bool):
-        parser.add_argument(
-            f"--{key}",
-            type=lambda x: x.lower() in ("true", "t", "yes", "y", "1"),
-            default=None,
-            help=f"Set {key} (true/false, default: {default_value})",
-        )
-    else:
-        parser.add_argument(
-            f"--{key}",
-            type=type(default_value),
-            default=None,
-            help=f"Override for {key}",
-        )
+    for key, default_value in model_config_dict.items():
+        if isinstance(default_value, bool):
+            parser.add_argument(
+                f"--{key}",
+                type=lambda x: x.lower() in ("true", "t", "yes", "y", "1"),
+                default=None,
+                help=f"Set {key} (true/false, default: {default_value})",
+            )
+        else:
+            parser.add_argument(
+                f"--{key}",
+                type=type(default_value),
+                default=None,
+                help=f"Override for {key}",
+            )
 
-for key, default_value in model_config_dict.items():
-    if isinstance(default_value, bool):
-        parser.add_argument(
-            f"--{key}",
-            type=lambda x: x.lower() in ("true", "t", "yes", "y", "1"),
-            default=None,
-            help=f"Set {key} (true/false, default: {default_value})",
-        )
-    else:
-        parser.add_argument(
-            f"--{key}",
-            type=type(default_value),
-            default=None,
-            help=f"Override for {key}",
-        )
+    for key, default_value in test_config_dict.items():
+        if isinstance(default_value, bool):
+            parser.add_argument(
+                f"--{key}",
+                type=lambda x: x.lower() in ("true", "t", "yes", "y", "1"),
+                default=None,
+                help=f"Set {key} (true/false, default: {default_value})",
+            )
+        else:
+            parser.add_argument(
+                f"--{key}",
+                type=type(default_value),
+                default=None,
+                help=f"Override for {key}",
+            )
 
-for key, default_value in test_config_dict.items():
-    if isinstance(default_value, bool):
-        parser.add_argument(
-            f"--{key}",
-            type=lambda x: x.lower() in ("true", "t", "yes", "y", "1"),
-            default=None,
-            help=f"Set {key} (true/false, default: {default_value})",
-        )
-    else:
-        parser.add_argument(
-            f"--{key}",
-            type=type(default_value),
-            default=None,
-            help=f"Override for {key}",
-        )
+    # Apply argparser
+    config = GeneralConfig()
+    modelconfig = ModelConfig()
+    args = parser.parse_args()
 
-# Apply argparser
-config = GeneralConfig()
-modelconfig = ModelConfig()
-args = parser.parse_args()
+    for key, value in vars(args).items():
+        if value is not None:
+            if hasattr(config, key):
+                if isinstance(getattr(config, key), bool):
+                    setattr(config, key, bool(value))
+                else:
+                    setattr(config, key, value)
 
-for key, value in vars(args).items():
-    if value is not None:
-        if hasattr(config, key):
-            if isinstance(getattr(config, key), bool):
-                setattr(config, key, bool(value))
-            else:
-                setattr(config, key, value)
-
-        if hasattr(modelconfig, key):
-            if isinstance(getattr(modelconfig, key), bool):
-                setattr(modelconfig, key, bool(value))
-            else:
-                setattr(modelconfig, key, value)
+            if hasattr(modelconfig, key):
+                if isinstance(getattr(modelconfig, key), bool):
+                    setattr(modelconfig, key, bool(value))
+                else:
+                    setattr(modelconfig, key, value)

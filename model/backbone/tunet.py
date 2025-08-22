@@ -38,6 +38,14 @@ class TimeEmbedding(nn.Module):
 
         return emb
 
+class AxialSepConv3d(nn.Module):
+    def __init__(self, in_ch, out_ch):
+        super().__init__()
+        self.xy = nn.Conv3d(in_ch, in_ch, kernel_size=(1,3,3), padding=(0,1,1), groups=in_ch, bias=False)
+        self.z  = nn.Conv3d(in_ch, out_ch, kernel_size=(3,1,1), padding=(1,0,0), bias=False)
+    def forward(self, x):
+        return self.z(self.xy(x))
+
 
 class TimeConvAttentionBlock(nn.Module):
     def __init__(
@@ -49,7 +57,7 @@ class TimeConvAttentionBlock(nn.Module):
         super().__init__()
 
         self.layer1 = nn.Sequential(
-            nn.Conv3d(input_chans, out_chans, kernel_size=3, padding=1),
+            AxialSepConv3d(input_chans, out_chans),
             nn.GroupNorm(4, out_chans),
             nn.SiLU(inplace=True),
         )
@@ -61,7 +69,7 @@ class TimeConvAttentionBlock(nn.Module):
         )
 
         self.layer2 = nn.Sequential(
-            nn.Conv3d(out_chans, out_chans, kernel_size=3, padding=1),
+            AxialSepConv3d(out_chans, out_chans),
             nn.GroupNorm(4, out_chans),
             nn.SiLU(inplace=True),
         )
@@ -247,7 +255,7 @@ class TimeUnet(nn.Module):
         meta_dim: int = 7,
         chans: int = 64,
         num_pool_layers: int = 6,
-        time_emb_dim: int = 256,
+        time_emb_dim: int = 128,
         block_type: Literal["block1", "block2", "block3"] = "block2",
     ):
         super().__init__()
@@ -361,7 +369,10 @@ class TimeUnet(nn.Module):
         layers = nn.ModuleList()
         ch = chans * (2 ** (num_pool_layers - 1))
         for _ in range(num_pool_layers - 1):
-            layers.append(nn.ConvTranspose3d(ch, ch, kernel_size=2, stride=2))
+            layers.append(nn.Sequential(
+            nn.Upsample(scale_factor=2, mode="trilinear", align_corners=False),
+            nn.Conv3d(ch, ch, kernel_size=1, bias=False),
+        ))
             ch //= 2
         layers.append(nn.Identity())
         return layers

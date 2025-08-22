@@ -400,6 +400,7 @@ class LongRecon(torch.nn.Module):
         prior_cond: Tensor, # shape: [B, 1, Z, H, W]
         meta: Tensor, # shape: [B, N]
         mask: Tensor, # shape: [B, 1, H, W]
+        debug: bool = False, # for debugging purposes
     ) -> Tensor:
         """
         Args:
@@ -417,6 +418,10 @@ class LongRecon(torch.nn.Module):
         B, _, _, _, _ = label_cond.shape
 
         times = torch.tensor([1000, 800, 600, 400, 300, 200, 150, 100, 50, 0], dtype=torch.long)
+        # use more dense timestep
+        # times = torch.tensor([1000, 900, 800, 700, 600, 500, 450, 400, 350, 300, 250, 200, 150, 100, 50, 0], dtype=torch.long)
+        if debug:
+            times = torch.tensor([1000, 0], dtype=torch.long)
         dts = (times[:-1] - times[1:]) / self.num_timesteps
         times = times[:-1]
 
@@ -469,6 +474,7 @@ class LongRecon(torch.nn.Module):
         prior_rot: Tensor, # shape: [B, Z, H, W]
         target: Tensor, # shape: [B, Z, H, W, C=2]
         meta: Tensor, # shape: [B, N]
+        debug: bool = False, # for debugging purposes
     ) -> tuple[
         Tensor,
         Tensor,
@@ -499,6 +505,7 @@ class LongRecon(torch.nn.Module):
             variational_k=False,
         )
 
+        prior_inp = prior.unsqueeze(1)
         prior = prior_rot if self.using_prior else torch.zeros_like(prior_rot)
 
         label_undersample = target_undersample  # [B, Z, H, W, C]
@@ -509,6 +516,7 @@ class LongRecon(torch.nn.Module):
             sudo_recon_input = torch.abs(label_undersample_complex).unsqueeze(1)  # [B, Z, H, W] -> [B, C=1, Z, H, W]
             sudo_recon = self.sudo_recon_img(img_undersample=sudo_recon_input)
             prior_reg, _ = self.registration_prior_to_target(prior=prior_rot.unsqueeze(1), target=sudo_recon)
+            validate_tensor_dimensions([prior_reg], 5)  # [B, 1, Z, H, W]
             prior_cond = prior_reg # [B, 1, Z, H, W]
         else:
             sudo_recon = None
@@ -517,9 +525,10 @@ class LongRecon(torch.nn.Module):
 
         x_t = self.flow_reverse(
             label_cond=label_cond, # shape: [B, C=2, Z, H, W]
-            prior_cond=prior_cond, # shape: [B, 1, Z, H, W]
+            prior_cond=prior_inp, # shape: [B, 1, Z, H, W]
             meta=meta,
             mask=mask,
+            debug=debug,
         ) # shape: [B, C=2, Z, H, W]
 
         return (

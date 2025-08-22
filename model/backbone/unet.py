@@ -28,6 +28,13 @@ def create_up_sample_layers(
     layers.append(ConvBlock(ch * 2, ch))
     return layers
 
+class AxialSepConv3d(nn.Module):
+    def __init__(self, in_ch, out_ch):
+        super().__init__()
+        self.xy = nn.Conv3d(in_ch, in_ch, kernel_size=(1,3,3), padding=(0,1,1), groups=in_ch, bias=False)
+        self.z  = nn.Conv3d(in_ch, out_ch, kernel_size=(3,1,1), padding=(1,0,0), bias=False)
+    def forward(self, x):
+        return self.z(self.xy(x))
 
 class ConvBlock(nn.Module):
     def __init__(
@@ -38,10 +45,10 @@ class ConvBlock(nn.Module):
         super().__init__()
 
         self.layers = nn.Sequential(
-            nn.Conv3d(in_chans, out_chans, kernel_size=3, padding=1),
+            AxialSepConv3d(in_chans, out_chans),
             nn.GroupNorm(4, out_chans),
             nn.SiLU(inplace=True),
-            nn.Conv3d(out_chans, out_chans, kernel_size=3, padding=1),
+            AxialSepConv3d(out_chans, out_chans),
             nn.GroupNorm(4, out_chans),
             nn.SiLU(inplace=True),
         )
@@ -85,10 +92,10 @@ class Unet(nn.Module):
 
         # Final convolution layers
         self.final_conv = nn.Sequential(
-            nn.Conv3d(chans, chans, kernel_size=3, padding=1),
+            AxialSepConv3d(chans, chans),
             nn.GroupNorm(4, chans),
             nn.SiLU(inplace=True),
-            nn.Conv3d(chans, out_chans, kernel_size=1, padding=0),
+            AxialSepConv3d(chans, out_chans),
         )
 
     def forward(
